@@ -17,13 +17,13 @@ binarization algorithms, according to Ground Truth;
 4 - Calculate and print the table with applied statistically-based
 metrics for binarization algorithms (without Ground Truth);
 
-5 - Calculate the order of classifiers from best to worsed by using
-Reference Method;
+# 5 - Calculate the order of classifiers from best to worsed by using
+# Reference Method;
 
 And, in the end:
 
 6 - Calculate how good not-traditionally used evaluation systems 
-(Pseudo-metrics and proposed Reference method ) are good by 
+(Pseudo-metrics `and proposed Reference method` ) are good by 
 calculating (average values through dataset):
 
    - Average sequence alignment cost between the order of classifiers 
