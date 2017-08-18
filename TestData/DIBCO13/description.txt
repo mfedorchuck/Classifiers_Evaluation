@@ -1,0 +1,11 @@
+All the .bmp and .tiff images are images from Digital Images Binarization Contest of 2013
+
+Printed images for contest:
+1-8 .bmp - PDIBCO 2013
+1-8 .tiff - Ground Truth for PDIBCO 2013
+
+Handwritten images:
+
+9-13 .bmp, IM14.tiff, 15.bmp, IM16.tiff - HDIBCO 2013
+
+9-16 .tiff - Ground Truth for HDIBCO 2013

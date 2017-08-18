@@ -1,0 +1,9 @@
+1-8 .bmp - PDIBCO 2013
+1-8 .tiff - Ground Truth for PDIBCO 2013
+
+9-16 .bmp HDIBCO 2013
+9-16 .tiff - Ground Truth for HDIBCO 2013
+
+%if NumOfImage == 14 || NumOfImage == 16
+%     ImName = sprintf('IM%d.tiff', NumOfImage)
+% end;

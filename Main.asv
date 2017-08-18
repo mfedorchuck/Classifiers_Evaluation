@@ -1,0 +1,150 @@
+%   The follow program perform next stages (in the loop for all the images):
+%
+%   1 - open the test image from graphics file;
+%
+%   2 - apply 10 binarization algorithms for every image;
+%
+%   3 - Calculate and print the table with applied traditional metrics for
+%   binarization algorithms, according to Ground Truth;
+%
+%   4 - Calculate and print the table with applied statistically-based
+%   metrics for binarization algorithms (without Ground Truth);
+%
+%   5 - Calculate the order of classifiers from best to worsed by using
+%   Reference Method;
+%
+%   6 - Calculate how good not-traditionally used evaluation systems 
+%   (Pseudo-metrics and proposed Reference method ) are good by 
+%   calculating (average values through dataset):
+%   - Average sequence alignment cost between the order of classifiers 
+%   - Average word-edit distance between the order of classifiers  
+%   - Average correlation of algorithm`s order between the order given by 
+%   F-Measure and statistically-based approaches
+
+clear all; close all; clc;
+
+fprintf('Time: %02s \n', datestr(now, 'HH:MM:SS')); fprintf('\n');
+disp('DIBCO dataset 2009');
+
+% path for test images
+ImPath = sprintf('%s%s', pwd, '\TestData\DIBCO09\');
+NumIm = length(dir([ImPath, '\*.bmp']));
+
+for NumOfImage = 1:NumIm
+   fprintf('Case number %d in progress...\n', NumOfImage);
+
+    ImName = sprintf('%d.bmp', NumOfImage);
+    GTName = sprintf('%d.tiff', NumOfImage);
+
+    TestImage = imread(sprintf('%s%s', ImPath, ImName));
+    GTImage = imread(sprintf('%s%s', ImPath, GTName));
+
+    GrayTestImage = rgb2gray(TestImage);
+    [N, M] = size(GrayTestImage);
+
+    fprintf('Size of current image is %d x %d \n', N, M);
+
+    %1 Binarization By Otsu`s method   
+    BinarizedByO = imbinarize(GrayTestImage, graythresh(GrayTestImage));  
+
+    %2 Binarization by using Sauvola method
+    BinarizedBySau = sauvola(GrayTestImage, [150 150]);     
+
+    %3 Binarization by using Wolf method
+    BinarizedByWolf = wolf(GrayTestImage, [100 100]);       
+
+    %4 Binarization by using Bernsen method
+    BinarizedByBrensen = bernsen(GrayTestImage, [3 3], 128);
+
+    %5 Binarization by using Kittler method
+    [Trashh, Minn] = kittlerMinimimErrorThresholding(GrayTestImage); 
+    BinarizedByKittler = imbinarize(GrayTestImage, Trashh / 255); 
+
+    %6 Binarized by using Niblack method
+    BinarizedByNiblack = niblack(GrayTestImage, [151 151], -0.2, 25);
+
+    %7 Binarization by using Bradley method
+    BinarizedByBradely = bradley(GrayTestImage, [25 25]);
+
+    %8 Binarization by using Gatos method
+    [BinarizedByGatos, Background_Gatos] = BinarizationGatos(GrayTestImage);
+
+    %9  Binarization by using adaptive image threshold 
+    BinarizedByAdaptT = imbinarize(GrayTestImage, adaptthresh(GrayTestImage,...
+       'ForegroundPolarity', 'dark'));
+
+    %10 Binarization by using adaptive image threshold
+    BinarizedByAdaptT2 = imbinarize(GrayTestImage, adaptthresh(GrayTestImage,...
+       0.7, 'ForegroundPolarity', 'dark'));
+
+%% ************** Constructor for all the bin. systems*********************
+[TableOfNames, ArrOfValues] = Constructor(BinarizedByWolf, BinarizedByAdaptT, BinarizedBySau,...
+    BinarizedByO, BinarizedByAdaptT2, BinarizedByNiblack, BinarizedByKittler,...
+    BinarizedByBrensen, BinarizedByBradely, BinarizedByGatos);
+
+%% **************** Displaying of system`s performance  *******************
+BinDisp(TestImage, GrayTestImage, GTImage, TableOfNames, ArrOfValues);
+
+fprintf('\nProgram paused. Press enter to continue.\n');
+pause;
+
+%% ************************* Evaluation metrics ***************************
+
+% Ground-Truth based evaluation metrics
+ComparizeGTTable = ComparisingWithGT(GTImage, TableOfNames, ArrOfValues);
+fprintf('\n Best clasifiers according to Ground-Truth based evaluation metrics:\n');
+disp(sortrows(ComparizeGTTable,'F1_score','descend'));
+
+% Statistically-based evaluation metrics
+StatEvaluationTable = StatMeasure(TableOfNames, ArrOfValues);
+fprintf('\n Best clasifiers according to Statistically based evaluation metrics:\n');
+disp(sortrows(StatEvaluationTable,'St_F1_score','descend'));
+
+fprintf('\nProgram paused. Press enter to continue.\n');
+pause;
+
+%[RefArr, AlternativeRefArr] = CompByRef(ArrOfValues); 
+% This approach will be explained later
+
+SortedStatTable = sortrows(StatEvaluationTable, 'St_F1_score', 'descend');
+SortedGTTable = sortrows(ComparizeGTTable, 'F1_score', 'descend');
+
+Word_GT_FM(:) = SortedGTTable.initial_code;
+Word_Ps_FM(:) = SortedStatTable.initial_code;
+
+num_ind = 1:10;
+SortedGTTable.num = num_ind(:); SortedGTTable = sortrows(SortedGTTable, 'initial_code', 'ascend');
+SortedStatTable.num = num_ind(:); SortedStatTable = sortrows(SortedStatTable, 'initial_code', 'ascend');
+
+%% Computing "word distance" and "sequence alignment cost"
+
+Ps_FM_Distance(NumOfImage) = SeqAlignCost(Word_Ps_FM, Word_GT_FM);
+EditPS_FM_distance(NumOfImage) = EditDistance(Word_Ps_FM,Word_GT_FM);
+
+%% Correlation of marks
+% add correlation of all another pairs: metric - pseudo-metric
+OrdCorrPsFM(NumOfImage) = corr2(SortedGTTable.num, SortedStatTable.num);
+
+PlaineCorrPsFM(NumOfImage) = corr2(ComparizeGTTable.F1_score, StatEvaluationTable.St_F1_score);
+
+fprintf('Case number %d complete\n', NumOfImage);
+fprintf('Time: %02s \n\n', datestr(now, 'HH:MM:SS'));
+end
+
+    DIBCO = 1; %Equal one only if you test only one dataset
+    
+disp('*************** Average sequence alignment cost through dataset ***************');
+    AvPsFMDistance = sum(Ps_FM_Distance, 'omitnan') / NumIm;
+
+fprintf('\n  Average sequence alignment cost between order \n given by F-Measure and Pseudo F-Measure: %.4g \n', AvPsFMDistance);
+    
+    disp('*************** Average word-edit distance through dataset ***************');
+    AvRefWordDistance(DIBCO) = sum(EditPS_FM_distance, 'omitnan') / NumIm;
+    
+    fprintf('\nAverage word-edit distance between order given by F-Measure and Pseudo F-Measure: %.4g \n', AvRefWordDistance(DIBCO));
+    
+    disp('*************** Average correlation of algorithm`s order through dataset ***************');
+    AvgCorrelationOfPsFM(DIBCO) = sum(OrdCorrPsFM, 'omitnan') / NumIm;
+    % Here - add not only correlation between the order, but also - between
+    % the marks
+    fprintf('\nAverage correlation of algorithm`s order between order given by F-Measure and Pseudo F-Measure: %.4g \n', AvgCorrelationOfPsFM(DIBCO));
