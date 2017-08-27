@@ -1,17 +1,21 @@
 function [V,v] = EditDistance(string1,string2)
-% Edit Distance is a standard Dynamic Programming problem. Given two strings s1 and s2, the edit distance between s1 and s2 is the minimum number of operations required to convert string s1 to s2. The following operations are typically used:
+% Edit Distance is a standard Dynamic Programming problem. Given two 
+% strings s1 and s2, the edit distance between s1 and s2 is the minimum 
+% number of operations required to convert string s1 to s2. The following 
+% operations are typically used:
 % Replacing one character of string by another character.
 % Deleting a character from string
 % Adding a character to string
+%
 % Example:
 % s1='article'
 % s2='ardipo'
 % EditDistance(s1,s2)
 % > 4
+%
 % you need to do 4 actions to convert s1 to s2
 % replace(t,d) , replace(c,p) , replace(l,o) , delete(e)
 % using the other output, you can see the matrix solution to this problem
-%
 %
 % by : Reza Ahmadzadeh (seyedreza_ahmadzadeh@yahoo.com - reza.ahmadzadeh@iit.it)
 % 14-11-2012
