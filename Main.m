@@ -40,10 +40,10 @@ fprintf('Time: %02s \n', datestr(now, 'HH:MM:SS')); fprintf('\n');
 disp('DIBCO dataset 2009');
 
 % path for test images
-ImPath = sprintf('%s%s', pwd, '\TestData\DIBCO09\');
-NumIm = length(dir([ImPath, '\*.bmp']));
+ImPath = sprintf('%s%s', pwd, '\TestData\DIBCO13\');
+NumIm = 13;
 
-for NumOfImage = 1:NumIm
+for NumOfImage = 15:15
 	fprintf('Case number %d in progress...\n', NumOfImage);
 
     ImName = sprintf('%d.bmp', NumOfImage);
@@ -58,13 +58,13 @@ for NumOfImage = 1:NumIm
     fprintf('Size of current image is %d x %d \n', N, M);
 
     % All the 10 binary classifiers performs by function:
-    [TableOfNames, ArrOfValues] = Binarization(GrayTestImage);
+    [TableOfNames, ArrOfValues] = Binarization(GrayTestImage, NumOfImage);
 
 %%  Displaying classifiers`s performance 
-    if NumOfImage == 1
-        BinDisp(TestImage, GrayTestImage, GTImage, TableOfNames, ArrOfValues);
-        fprintf('\nProgram paused. Press enter to continue.\n'); pause;
-    end
+%     if NumOfImage == 1
+%         BinDisp(TestImage, GrayTestImage, GTImage, TableOfNames, ArrOfValues);
+%         fprintf('\nProgram paused. Press enter to continue.\n'); pause;
+%     end
 
 %%  Evaluation metrics 
 
